@@ -5,21 +5,20 @@ import google.genai as genai
 def get_recommendations(answers, lang):
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     
-    # Constructing the Narrative Paragraph for Gemini
-    vibe_p = (
-        f"The user wants a {answers.get('genre')} sound from the {answers.get('era')}. "
-        f"They are in a {answers.get('mood')} mood, listening during {answers.get('setting')}. "
-        f"They want {answers.get('discovery')} and the language must be {lang}."
+    # Create the Vibe Paragraph from the 5 answers
+    vibe_summary = (
+        f"User seeks a {answers.get('genre')} vibe from the {answers.get('era')}. "
+        f"Mood: {answers.get('mood')}. Setting: {answers.get('setting')}. "
+        f"Discovery: {answers.get('discovery')}. Language: {lang}."
     )
 
-    system_msg = "You are Fabergé, an elite curator. Analyze vibe paragraphs and return ONLY valid JSON."
+    system_msg = "You are Fabergé, a luxury music curator. Return strictly valid JSON."
 
     prompt = f"""
-    ANALYSIS: {vibe_p}
-    
-    TASK: Return a 15-track playlist in JSON:
+    Vibe Context: {vibe_summary}
+    Return 15 tracks in this JSON format:
     {{
-      "summary": "A 1-sentence poetic summary.",
+      "summary": "Poetic description",
       "vibe_stats": [{{"name": "Nostalgia", "value": 25}}, ...],
       "tracks": [{{"artist": "Name", "track": "Title"}}, ...]
     }}
@@ -33,6 +32,5 @@ def get_recommendations(answers, lang):
         )
         return json.loads(response.text.strip())
     except Exception as e:
-        
-        print(f"❌ AI Error: {e}")
-        return None # Handled by the check in app.py
+        print(f"AI Error: {e}")
+        return None
