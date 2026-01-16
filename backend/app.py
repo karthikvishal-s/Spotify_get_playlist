@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Vercel Environment Variables
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3030")
 
 sp_oauth = SpotifyOAuth(
     client_id=os.getenv("SPOTIPY_CLIENT_ID"),
@@ -20,7 +20,7 @@ sp_oauth = SpotifyOAuth(
     scope="user-read-email user-top-read user-read-private playlist-modify-public playlist-modify-private"
 )
 
-@app.route('/api/questions')
+@app.route('/questions')
 def questions():
     return jsonify([
         {"id": "genre", "text": "What is the primary sonic foundation?", "options": ["Classical/Jazz", "Rock/Indie", "Pop/Mainstream", "Electronic/Dance", "Hip-Hop/R&B", "Folk/Acoustic"]},
@@ -30,7 +30,7 @@ def questions():
         {"id": "discovery", "text": "How deep should we dig?", "options": ["Chart Toppers", "Hidden Gems", "Underground", "Balanced"]}
     ])
 
-@app.route('/api/generate', methods=['POST'])
+@app.route('/generate', methods=['POST'])
 def generate():
     data = request.json
     # Convert 5 answers into a Vibe Paragraph internally in ai_service
@@ -50,11 +50,11 @@ def generate():
     save_generation(data.get('email'), full_payload)
     return jsonify(full_payload)
 
-@app.route('/api/login')
+@app.route('/login')
 def login():
     return jsonify({"auth_url": sp_oauth.get_authorize_url()})
 
-@app.route('/api/callback')
+@app.route('/callback')
 def callback():
     code = request.args.get('code')
     token_info = sp_oauth.get_access_token(code, as_dict=False)
@@ -62,13 +62,13 @@ def callback():
     sync_user_data(user.get('email'), user.get('id'))
     return redirect(f"{FRONTEND_URL}/quiz?token={token_info}&email={user.get('email')}")
 
-@app.route('/api/get-history')
+@app.route('/get-history')
 def get_history():
     email = request.args.get('email')
     history = fetch_last_vibe(email)
     return jsonify(history if history else [])
 
-@app.route('/api/export', methods=['POST'])
+@app.route('/export', methods=['POST'])
 def export():
     data = request.json
     token, uris, name = data.get('token'), data.get('uris'), data.get('name')

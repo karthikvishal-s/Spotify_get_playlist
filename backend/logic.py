@@ -12,3 +12,4 @@ def calculate_vibe(answers):
         "target_energy": int(answers.get('q1', 5)) / 10.0,
         "target_valence": int(answers.get('q2', 5)) / 10.0
     }
+
